@@ -1,0 +1,77 @@
+.sessions-section {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.sessions-section h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  position: sticky;
+  top: 0;
+  background: white;
+  padding-bottom: 10px;
+  z-index: 1;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Custom scrollbar */
+.sessions-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sessions-section::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.sessions-section::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.sessions-section::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+@media (max-width: 768px) {
+  .sessions-section {
+    max-height: none;
+  }
+  
+  .empty-state {
+    padding: 40px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+}

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  ev-charging-tracker:
+    build: .
+    container_name: ev-charging-tracker
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ev-tracker.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.ev-tracker.entrypoints=websecure"
+      - "traefik.http.routers.ev-tracker.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ev-tracker.loadbalancer.server.port=80"
