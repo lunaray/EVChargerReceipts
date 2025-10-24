@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Stats from './components/Stats';
 import ReceiptInput from './components/ReceiptInput';
 import SessionsList from './components/SessionsList';
+import MileageTracker from './components/MileageTracker';
 import './App.css';
 
 function App() {
@@ -16,13 +17,14 @@ function App() {
     totalEnergy: 0,
     avgCostPerKwh: 0
   });
+  const [efficiencyMetrics, setEfficiencyMetrics] = useState(null);
 
   const loadSessions = useCallback(async () => {
     try {
       const sessionData = await DatabaseService.getAllSessions();
       setSessions(sessionData);
       
-      // Calculate stats
+      // Calculate basic stats
       const totalCost = sessionData.reduce((sum, s) => sum + (s.total_cost || 0), 0);
       const totalEnergy = sessionData.reduce((sum, s) => sum + (s.total_energy_kwh || 0), 0);
       
@@ -38,11 +40,28 @@ function App() {
     }
   }, []);
 
+  const loadEfficiencyMetrics = useCallback(async () => {
+    try {
+      const metrics = await DatabaseService.getEfficiencyMetrics();
+      setEfficiencyMetrics(metrics);
+    } catch (error) {
+      console.error('Error loading efficiency metrics:', error);
+      // Don't show error for metrics as it's not critical
+    }
+  }, []);
+
+  const refreshData = useCallback(async () => {
+    await Promise.all([
+      loadSessions(),
+      loadEfficiencyMetrics()
+    ]);
+  }, [loadSessions, loadEfficiencyMetrics]);
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
         await DatabaseService.initialize();
-        await loadSessions();
+        await refreshData();
       } catch (error) {
         console.error('Error initializing app:', error);
         setMessage({ type: 'error', text: 'Error initializing database.' });
@@ -50,7 +69,7 @@ function App() {
     };
     
     initializeApp();
-  }, [loadSessions]);
+  }, [refreshData]);
 
   const handleParseReceipt = async (receiptText) => {
     if (!receiptText.trim()) {
@@ -80,7 +99,7 @@ function App() {
 
       // Insert new session
       await DatabaseService.insertSession(sessionData);
-      await loadSessions();
+      await refreshData();
       
       setMessage({ type: 'success', text: 'Charging session added successfully!' });
       
@@ -97,7 +116,7 @@ function App() {
     if (window.confirm('Are you sure you want to delete this charging session?')) {
       try {
         await DatabaseService.deleteSession(sessionId);
-        await loadSessions();
+        await refreshData();
         setMessage({ type: 'success', text: 'Session deleted successfully!' });
         setTimeout(() => setMessage({ type: '', text: '' }), 3000);
       } catch (error) {
@@ -107,6 +126,11 @@ function App() {
     }
   };
 
+  const handleMileageUpdate = async () => {
+    // Refresh metrics when mileage is updated
+    await loadEfficiencyMetrics();
+  };
+
   const clearMessage = () => {
     setMessage({ type: '', text: '' });
   };
@@ -114,18 +138,23 @@ function App() {
   return (
     <div className="container">
       <Header />
-      <Stats stats={stats} />
+      <Stats stats={stats} efficiencyMetrics={efficiencyMetrics} />
       
       <div className="main-content">
-        <ReceiptInput 
-          onParseReceipt={handleParseReceipt}
-          message={message}
-          onClearMessage={clearMessage}
-        />
-        <SessionsList 
-          sessions={sessions}
-          onDeleteSession={handleDeleteSession}
-        />
+        <div className="left-column">
+          <MileageTracker onMileageUpdate={handleMileageUpdate} />
+          <ReceiptInput 
+            onParseReceipt={handleParseReceipt}
+            message={message}
+            onClearMessage={clearMessage}
+          />
+        </div>
+        <div className="right-column">
+          <SessionsList 
+            sessions={sessions}
+            onDeleteSession={handleDeleteSession}
+          />
+        </div>
       </div>
     </div>
   );

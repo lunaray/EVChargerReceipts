@@ -1,31 +1,54 @@
 # EV Charging Tracker
 
-A React-based web application to track your electric vehicle charging sessions and costs. Built specifically for parsing AmpUp receipts with extensibility for other charging providers.
+A full-stack React and Node.js application to track your electric vehicle charging sessions and costs. Features a React frontend with a Node.js/Express backend using SQLite for persistent data storage.
 
 ## Features
 
 - 📱 **Modern React Interface** - Clean, responsive design that works on all devices
-- 🗄️ **Local SQLite Database** - All data stored locally in your browser using SQL.js
+- 🗄️ **SQLite Database** - Persistent server-side storage with full CRUD operations
 - ⚡ **AmpUp Integration** - Automatic parsing of AmpUp charging receipts
 - 📊 **Real-time Statistics** - Track total sessions, costs, energy consumption, and efficiency
 - 🚗 **Vehicle-Specific** - Pre-configured for Polestar 2 2022 Long Range Dual Motor
 - 🔌 **Extensible** - Ready for additional charging network parsers
+- 🚀 **Full-Stack Architecture** - Secure API with rate limiting and CORS protection
+- 📦 **Docker Ready** - Easy deployment with Docker and docker-compose
 
 ## Quick Start
 
 ### Local Development
 
+#### Option 1: Automated Setup
+```bash
+# Run the setup script
+npm run setup
+
+# Start both frontend and backend
+npm run dev
+```
+
+#### Option 2: Manual Setup
 1. **Install dependencies**
    ```bash
+   # Install frontend dependencies
    npm install
+   
+   # Install backend dependencies
+   cd server
+   npm install
+   cd ..
    ```
 
-2. **Start development server**
+2. **Start the backend server**
+   ```bash
+   npm run dev:server
+   # Backend will run on http://localhost:3001
+   ```
+
+3. **Start the frontend (in a new terminal)**
    ```bash
    npm start
+   # Frontend will run on http://localhost:3000
    ```
-
-3. **Open your browser to http://localhost:3000**
 
 ### Docker Deployment
 

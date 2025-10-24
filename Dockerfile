@@ -1,30 +1,43 @@
-# Build stage
-FROM node:18-alpine as build
+# Multi-stage build for production deployment
 
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
+# Backend build stage
+FROM node:18-alpine as backend-builder
+WORKDIR /app/server
+COPY server/package*.json ./
 RUN npm ci --only=production
+COPY server/ ./
 
-# Copy source code
-COPY . .
-
-# Build the app
+# Frontend build stage
+FROM node:18-alpine as frontend-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . ./
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM node:18-alpine as production
 
-# Copy built app to nginx
-COPY --from=build /app/build /usr/share/nginx/html
+# Install production dependencies for backend
+WORKDIR /app
+COPY server/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
 
-# Copy nginx configuration (optional)
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy backend application
+COPY server/ ./
 
-# Expose port 80
-EXPOSE 80
+# Copy built frontend
+COPY --from=frontend-builder /app/build ./public
 
-CMD ["nginx", "-g", "daemon off;"]
+# Create data directory for SQLite database
+RUN mkdir -p /app/data
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "fetch('http://localhost:3001/api/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
+
+# Start the application
+CMD ["node", "server.js"]

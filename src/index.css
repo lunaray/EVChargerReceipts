@@ -53,6 +53,17 @@ code {
   padding: 30px;
 }
 
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
 @media (max-width: 768px) {
   body {
     padding: 10px;
